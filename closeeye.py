@@ -1,12 +1,11 @@
-﻿#20131212
-import os
+﻿import os
 import string
 import random
 
 class Game:
     def play():
-        test = input('是否开始游戏？（是/否）')
-        while test == '是':
+        test = input('是否开始游戏？（y/n）').lower()
+        while test == 'y':
             os.system('cls')
             f = open("config.txt")
             #人数 = int(input("请输入游戏人数："))
@@ -23,7 +22,8 @@ class Game:
 
             玩家列表 = list(玩家.keys())
             身份列表 = {} #格式为“身份:[玩家,玩家,...]”
-            
+
+            print("现在共有%s名玩家" % 人数)
             身份 = input("请输入身份组成及其人数（例：警察 2），一行一个，输入空行停止，总和必须小于等于总人数\n")
             temp = 0
             玩家列表temp = 玩家列表[:]
@@ -52,7 +52,16 @@ class Game:
             
             print("身份分配完毕，身份如下：\n")
             print(身份列表)
-            test = input('是否开始游戏？（是/否）')
+
+            #游戏流程开始
+            while True:
+                #夜晚流程开始
+                for team in 身份列表:
+                    #处理每个身份类型
+                    continue
+                break
+            
+            test = input('是否开始游戏？（是/否）').lower()
 
 class 角色:
     def __init__(self):
@@ -68,7 +77,7 @@ class 角色:
     def getNumOfZeroPin(self):
         return self.zeroPin
     
-    def kill(self):
+    def killed(self):
         self.kill += 1
 
     def cure(self):
@@ -104,6 +113,10 @@ class 警察(角色):
     def __init__(self):
         super(角色,self).__init__()
         self.charactor = '警察'
+
+class 警察组:
+    def __init__(self,police = []):
+        self.polices = police
     
     def observe(self,charactor):
         return charactor.charactor
@@ -113,15 +126,19 @@ class 杀手(角色):
         super(角色,self).__init__()
         self.charactor = '杀手'
 
-    def killSb(self,charactor):
-        charactor.kill()
+class 杀手组:
+    def __init__(self,killer = []):
+        self.killers = killer
+
+    def kill(self,charactor):
+        charactor.killed()
 
 class 医生(角色):
     def __init__(self):
         super(角色,self).__init__()
         self.charactor = '医生'
 
-    def cureSb(self,charactor):
+    def cure(self,charactor):
         charactor.cure()
 
         
