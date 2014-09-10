@@ -11,24 +11,24 @@ class Game:
         test = input('是否开始游戏？（y/n）').lower()
         while test == 'y':
             os.system('cls')
-            f = open("config.txt")
+            f = open("config.txt", encoding="utf_8")
 
             name = f.readline()
             i = 0
             while name != "":
-                name = f.readline()
-                玩家[name] = [i]
+                name = f.readline().rstrip('\n')
+                Game.玩家[name] = [i]
                 i += 1
 
             print("正在分配身份\n")
 
-            玩家列表 = list(玩家.keys())
+            玩家列表 = list(Game.玩家.keys())
 
-            print("现在共有%s名玩家" % 人数)
-            身份 = input("请输入身份组成及其人数（例：警察 2），一行一个，输入空行停止，总和必须小于等于总人数\n")
+            print("现在共有%s名玩家。" % len(Game.玩家))
+            身份 = input("\n请输入身份组成及其人数（例：警察 2），一行一个，输入空行停止，总和必须小于等于总人数\n")
             temp = 0
             玩家列表temp = 玩家列表[:]
-            while 身份 != "" and temp <= 人数:
+            while 身份 != "" and temp <= len(Game.玩家):
                 t = 身份.split()
                 for ti in t[1:]:    #去除非法字符
                     if not ti.isnumeric():
@@ -37,46 +37,55 @@ class Game:
                 for ti in range(int(t[1])):
                     玩家temp = random.choice(玩家列表temp)
                     玩家列表temp.remove(玩家temp)
-                    if t[0] in 身份列表:
-                        身份列表[t[0]].append(玩家temp)
+                    
+                    if t[0] == "平民":
+                        玩家temp = (玩家temp,平民())
+                    elif t[0] == "杀手":
+                        玩家temp = (玩家temp,杀手())
+                    elif t[0] == "警察":
+                        玩家temp = (玩家temp,警察())
+                    elif t[0] == "医生":
+                        玩家temp = (玩家temp,医生())
                     else:
-                        身份列表[t[0]] = [玩家temp]
+                        玩家temp = (玩家temp,平民())
+                    
+                    if t[0] in Game.身份列表:
+                        Game.身份列表[t[0]].append(玩家temp)
+                    else:
+                        Game.身份列表[t[0]] = [玩家temp]
 
                 temp += int(t[1])
                 身份 = input()
 
             if len(玩家列表temp)> 0:
-                if "平民" in 身份列表:
-                    身份列表["平民"] += 玩家列表temp
-                else:
-                    身份列表["平民"] = 玩家列表temp
+                for x in 玩家列表temp:
+                    x = (x,平民())
+                    if "平民" in Game.身份列表:
+                        Game.身份列表["平民"].append(x)
+                    else:
+                        Game.身份列表["平民"] = [x]
 
             print("身份分配完毕，身份如下：\n")
-            print(身份列表)
-
-            for x in 身份列表:
-                if x[1] == "平民":
-                    身份列表[1] = 平民()
-                elif x[1] == "杀手":
-                    身份列表[1] = 杀手()
-                elif x[1] == "警察":
-                    身份列表[1] = 警察()
-                elif x[1] == "医生":
-                    身份列表[1] = 医生()
-                else:
-                    身份列表[1] = 平民()
+            #测试用输出
+            #TODO:格式化身份列表输出函数
+            print(Game.身份列表)
 
             polices = 警察组()
             killers = 杀手组()
-            游戏列表 = [polices, killers]
-            for x in 身份列表:
-                if x[1].charactor == "杀手":
-                    killers.killers.append(x)
-                elif x[1].charactor == "警察":
-                    polices.polices.append(x)
-                else:
-                    游戏列表.append(x)
-
+            游戏列表 = [("警察组",polices), ("杀手组",killers)]
+            for x in Game.身份列表["杀手"]:
+                killers.killers.append(x)
+            for x in Game.身份列表["警察"]:
+                polices.polices.append(x)
+            for x in Game.身份列表.items():
+                if x[0] != '杀手' and x[0] != '警察':
+                    for y in x[1]:
+                        游戏列表.append(y)
+            #测试用代码
+            print(游戏列表)
+            print(polices.polices)
+            print(killers.killers)
+            
             #游戏流程开始
             days = 1
             night = False
@@ -91,7 +100,7 @@ class Game:
                 #处理夜晚的行动结果
                 print("第%d天夜晚结束。" % days)
                 flag = True
-                for x in 身份列表:
+                for x in Game.身份列表:
                     if x[1].isKilled():
                         print("昨天晚上，%s。" % (x[0]+"被杀了，身份是"+x[1].charactor))
                         flag = False
@@ -102,7 +111,7 @@ class Game:
                 days += 1
                 night = not night
                 print("第%d天白天开始，请各位自由讨论，时长%d分钟。" % (days, SetTime))
-                
+                #TODO：计时器和投票程序
                 break
 
             test = input('是否开始游戏？（是/否）').lower()
