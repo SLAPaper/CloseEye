@@ -3,31 +3,32 @@ import string
 import random
 
 class Game:
-    玩家 = {}
+    玩家 = []
     身份列表 = {} #格式为“身份:[玩家,玩家,...]”
     SetTime = 5
 
     def play():
         test = input('是否开始游戏？（y/n）').lower()
         while test == 'y':
-            os.system('cls')
+            #os.system('cls')
             f = open("config.txt", encoding="utf_8")
 
-            name = f.readline()
+            name = f.readline().rstrip('\n').lstrip('\ufeff')
             i = 0
             while name != "":
+                Game.玩家.append(name)
                 name = f.readline().rstrip('\n')
-                Game.玩家[name] = [i]
                 i += 1
 
             print("正在分配身份\n")
 
-            玩家列表 = list(Game.玩家.keys())
+            玩家列表 = tuple(Game.玩家)
+            print(玩家列表,end='\n\n')
 
             print("现在共有%s名玩家。" % len(Game.玩家))
             身份 = input("\n请输入身份组成及其人数（例：警察 2），一行一个，输入空行停止，总和必须小于等于总人数\n")
             temp = 0
-            玩家列表temp = 玩家列表[:]
+            玩家列表temp = list(玩家列表[:])
             while 身份 != "" and temp <= len(Game.玩家):
                 t = 身份.split()
                 for ti in t[1:]:    #去除非法字符
@@ -65,10 +66,15 @@ class Game:
                     else:
                         Game.身份列表["平民"] = [x]
 
-            print("身份分配完毕，身份如下：\n")
-            #测试用输出
+            print("身份分配完毕，身份如下：",end='\n\n')
             #TODO:格式化身份列表输出函数
-            print(Game.身份列表)
+            
+            #####测试用代码#####
+            #print(Game.身份列表)
+            for x in Game.身份列表.items():
+                for y in x[1]:
+                    print(y[0]+'\t'+x[0])
+            ####################
 
             polices = 警察组()
             killers = 杀手组()
@@ -81,10 +87,13 @@ class Game:
                 if x[0] != '杀手' and x[0] != '警察':
                     for y in x[1]:
                         游戏列表.append(y)
-            #测试用代码
-            print(游戏列表)
-            print(polices.polices)
-            print(killers.killers)
+                        
+            #####测试用代码#####
+            #print("\n游戏列表如下：")
+            #print(游戏列表)
+            #print(polices.polices)
+            #print(killers.killers)
+            ####################
             
             #游戏流程开始
             days = 1
@@ -92,35 +101,36 @@ class Game:
             while True:
                 #夜晚流程开始
                 night = not night
-                print("第%d天夜晚开始，请有身份的玩家开始行动。" % days)
+                print("\n第%d天夜晚开始，请有身份的玩家开始行动。" % days)
                 for x in 游戏列表:
                     #处理每个身份类型
-                    x.operate()
+                    x[1].operate()
                 
                 #处理夜晚的行动结果
-                print("第%d天夜晚结束。" % days)
+                print("\n第%d天夜晚结束。" % days)
                 flag = True
-                for x in Game.身份列表:
-                    if x[1].isKilled():
-                        print("昨天晚上，%s。" % (x[0]+"被杀了，身份是"+x[1].charactor))
-                        flag = False
+                for x in Game.身份列表.values():
+                    for y in x:
+                        if y[1].isKilled():
+                            print("昨天晚上，%s。" % (y[0]+"被杀了，身份是"+x[1].charactor))
+                            flag = False
                 if flag:
                     print("昨晚是个平安夜。")
                 
                 #白天流程开始
                 days += 1
                 night = not night
-                print("第%d天白天开始，请各位自由讨论，时长%d分钟。" % (days, SetTime))
+                print("第%d天白天开始，请各位自由讨论，时长%d分钟。" % (days, Game.SetTime))
                 #TODO：计时器和投票程序
                 break
 
-            test = input('是否开始游戏？（是/否）').lower()
+            test = input('是否开始游戏？（y/n）').lower()
 
 class 角色:
     def __init__(self):
         self.alive = True
         self.zeroPin = 0
-        self.kill = 0
+        self.killCount = 0
         self.charactor = ''
         self.numOfVotes = 0
         self.deathNotes = ""
@@ -132,23 +142,23 @@ class 角色:
         return self.zeroPin
 
     def killed(self):
-        self.kill += 1
+        self.killCount += 1
 
     def cure(self):
-        self.kill -= 1
+        self.killCount -= 1
 
     def isKilled(self):
-        if self.kill>0:
+        if self.killCount>0:
             self.alive = False
             self.deathNotes = "被杀了"
             return True
-        elif self.kill<0:
+        elif self.killCount<0:
             self.zero_pin += 1
-            return False
             if self.zero_pin>1:
                 self.alive = false
                 self.deathNotes = "被扎死了"
                 return True
+        return False
 
     def vote(self, target):
         target.voted()
@@ -159,10 +169,6 @@ class 角色:
     def getNumOfVotes(self):
         return self.numOfVotes
 
-    alive = property(isAlive)
-    zero_pin = property(getNumOfZeroPin)
-    numOfVotes = property(getNumOfVotes)
-
 class 身份:
     def operate(self):
         return
@@ -170,12 +176,12 @@ class 身份:
 
 class 平民(角色,身份):
     def __init__(self):
-        super(角色,self).__init__()
+        super().__init__()
         self.charactor = '平民'
 
 class 警察(角色,身份):
     def __init__(self):
-        super(角色,self).__init__()
+        super().__init__()
         self.charactor = '警察'
 
 class 警察组(身份):
@@ -190,7 +196,7 @@ class 警察组(身份):
 
 class 杀手(角色):
     def __init__(self):
-        super(角色,self).__init__()
+        super().__init__()
         self.charactor = '杀手'
 
 class 杀手组(身份):
@@ -205,7 +211,7 @@ class 杀手组(身份):
 
 class 医生(角色,身份):
     def __init__(self):
-        super(角色,self).__init__()
+        super().__init__()
         self.charactor = '医生'
 
     def cure(self, charactor):
