@@ -6,6 +6,8 @@ class Game:
     玩家 = []
     身份列表 = {} #格式为“身份:[玩家,玩家,...]”
     SetTime = 5
+    TotalPin = 5
+    TotalShoot = 3
 
     def play():
         test = input('是否开始游戏？（y/n）').lower()
@@ -67,7 +69,6 @@ class Game:
                         Game.身份列表["平民"] = [x]
 
             print("身份分配完毕，身份如下：",end='\n\n')
-            #TODO:格式化身份列表输出函数
             
             #####测试用代码#####
             #print(Game.身份列表)
@@ -122,6 +123,16 @@ class Game:
                 night = not night
                 print("第%d天白天开始，请各位自由讨论，时长%d分钟。" % (days, Game.SetTime))
                 #TODO：计时器和投票程序
+                存活列表 = []
+                for x in Game.身份列表.values():
+                    for y in x:
+                        if y[1].isAlive() == True:
+                            y[1].numOfVotes = 0
+                            存活列表.append(y)
+                voteCount = 0
+                while voteCount <= len(存活列表):
+                    voteInformation = input("请输入投票信息，格式为”投票人 被票人“一次一行，如“小V 悲喜”").split()
+                
                 break
 
             test = input('是否开始游戏？（y/n）').lower()
@@ -213,6 +224,7 @@ class 医生(角色,身份):
     def __init__(self):
         super().__init__()
         self.charactor = '医生'
+        self.numOfPins = Game.TotalPin
 
     def cure(self, charactor):
         charactor.cure()
@@ -220,5 +232,17 @@ class 医生(角色,身份):
     def operate(self):
         print("现在是医生的活动时间，请选择需要扎针的玩家。")
 
-
+class 狙击手(角色,身份):
+    def __init__(self):
+        super().__init__()
+        self.charactor = '狙击'
+        self.numOfShoots = Game.TotalShoot
+    
+    def shoot(self, charactor):
+        #TODO:判断子弹数量和已击发子弹数量
+        #TODO:判断是否射到杀手
+        charactor.killed()
+    
+    def operate(self):
+        print("现在是杀手的活动时间，请选择需要射击的玩家。")
 Game.play()
