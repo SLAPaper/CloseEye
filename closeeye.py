@@ -129,10 +129,29 @@ class Game:
                         if y[1].isAlive() == True:
                             y[1].numOfVotes = 0
                             存活列表.append(y)
-                voteCount = 0
+                voteCount = 0   #格式为：{"被票人":"投票人"，...}
+                voteDict = {}
                 while voteCount <= len(存活列表):
-                    voteInformation = input("请输入投票信息，格式为”投票人 被票人“一次一行，如“小V 悲喜”").split()
+                    if voteCount == len(存活列表):
+                        voteInformation = print("所有存活玩家已投票，回复空行结束白天流程并进行计票，回复“投票人 被票人”进行改票").rstrip("\n").split()
+                        if voteInformation[0] == "":
+                            voteCount += 1
+                    else:
+                        voteInformation = input("请输入投票信息，格式为”投票人 被票人“一次一行，如“小V 悲喜”").split()
+                    if voteInformation[0] not in 存活列表:
+                        print("错误：%s不具有投票权限" % voteInformation[0])
+                    else:
+                        if voteInformation[0] not in voteDict.keys():
+                            voteCount += 1
+                        if voteInformation[1] not in 存活列表:
+                            print("警告：%s投票了不能票到的%s（已死亡/输入有误），将视为自票" % voteInformation）
+                            voteDict[voteInformation[0]] = voteInformation[0]
+                        else:
+                            voteDict[voteInformation[0]] = voteInformation[1]
                 
+                for x in Game.身份列表.values():
+                    for y in x:
+                        for i in voteDict:
                 break
 
             test = input('是否开始游戏？（y/n）').lower()
