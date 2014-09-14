@@ -163,11 +163,25 @@ class Game:
                 for x in voteCountList:
                     print("%s\t%d" % x)
                 
+                maxVotes = []
                 for x in Game.身份列表.values():
                     for y in x:
                         y[1].numOfVotes = voteCountDict[y[0]]
-                        
-                #TODO 票选出局判定
+                        if len(maxVotes) == 0 or y[1].numOfVotes >= maxVotes[0][1].numOfvotes:
+                            if y[1].numOfVotes > maxVotes[0][1].numOfVotes:
+                                maxVotes.clear()
+                            maxVotes.append(y)
+                        elif y[1].numOfVotes > maxVotes:
+                #TODO：票选出局判定
+                if len(maxVotes) > 1:
+                    print("现在有超过一名玩家得票并列最高，为%d票，如下所示：" % maxVotes[0][1].numOfVotes)
+                    for x in maxVotes:
+                        print("%s\t%d票" % (x[0],x[1].numOfVotes))
+                    out = input("请输入出局的玩家")
+                    while out == "":       #TODO：处理不合法输入
+                        out = input("请输入出局的玩家")
+                    
+                
                 break
 
             test = input('是否开始游戏？（y/n）').lower()
