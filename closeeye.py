@@ -173,14 +173,19 @@ class Game:
                             maxVotes.append(y)
                         elif y[1].numOfVotes > maxVotes:
                 #TODO：票选出局判定
+                out = ""
                 if len(maxVotes) > 1:
                     print("现在有超过一名玩家得票并列最高，为%d票，如下所示：" % maxVotes[0][1].numOfVotes)
+                    maxVotesList = []
                     for x in maxVotes:
                         print("%s\t%d票" % (x[0],x[1].numOfVotes))
-                    out = input("请输入出局的玩家")
-                    while out == "":       #TODO：处理不合法输入
+                        maxVotesList.append(x[0])
+                    out = input("请输入出局的玩家").rstrip("\n")
+                    while out == "" or out not in maxVotesList:
                         out = input("请输入出局的玩家")
-                    
+                else:
+                    out = maxVotes[0][0]
+                #TODO: 输出出局信息并将出局玩家设为死亡状态
                 
                 break
 
