@@ -55,8 +55,8 @@ class Game:
                 身份 = input()
                 
             #处理剩余玩家
-            if len(玩家列表temp)> 0:
-                for x in 玩家列表temp:
+            if len(玩家列表副本)> 0:
+                for x in 玩家列表副本:
                     Game.游戏字典[x] = 平民()
 
             print("身份分配完毕，身份如下：",end='\n\n')
@@ -67,14 +67,14 @@ class Game:
                 print(x[0]+'\t'+x[1].charactor)
             ####################
 
-            polices = 警察组()
-            killers = 杀手组()
-            行动字典 = {"警察组":polices, "杀手组":killers}
+            警察组对象 = 警察组()
+            杀手组对象 = 杀手组()
+            行动字典 = {"警察组":警察组对象, "杀手组":杀手组对象}
             for x in Game.游戏列表.items():
                 if x[1].charactor == "杀手":
-                    killers.killers[x[0]] = x[1]
+                    杀手组对象.killers[x[0]] = x[1]
                 elif x[1].charactor == "警察":
-                    polices.polices[x[0]] = x[1]
+                    警察组对象.polices[x[0]] = x[1]
                 else
                     行动字典[x[0]] = x[1]
             
@@ -95,7 +95,7 @@ class Game:
                 flag = True
                 for x in Game.游戏字典.items():
                     if x[1].isKilled():
-                        print("昨天晚上，%s。" % (x[0]+"被杀了，身份是"+x[1].charactor))
+                        print("昨天晚上，%s被杀了，身份是%s，请留下遗言。" % (x[0],x[1].charactor))
                         flag = False
                 if flag:
                     print("昨晚是个平安夜。")
@@ -167,6 +167,7 @@ class Game:
                 else:
                     out = maxVotes[0][0]
                 #TODO: 输出出局信息并将出局玩家设为死亡状态
+                print("玩家%s被投票出局，身份是%s，没有遗言。" %
                 
                 break
 
