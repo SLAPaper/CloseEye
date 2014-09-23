@@ -145,15 +145,13 @@ class Game:
                     print("%s\t%d" % x)
                 
                 maxVotes = []
-                for x in Game.身份列表.values():
-                    for y in x:
-                        y[1].numOfVotes = voteCountDict[y[0]]
-                        if len(maxVotes) == 0 or y[1].numOfVotes >= maxVotes[0][1].numOfvotes:
-                            if y[1].numOfVotes > maxVotes[0][1].numOfVotes:
-                                maxVotes.clear()
-                            maxVotes.append(y)
-                        elif y[1].numOfVotes > maxVotes:
-                #TODO：票选出局判定
+                for x in Game.游戏字典.items():
+                    x[1].numOfVotes = voteCountDict[x[0]]
+                    if len(maxVotes) == 0 or x[1].numOfVotes >= maxVotes[0][1].numOfvotes:
+                        if x[1].numOfVotes > maxVotes[0][1].numOfVotes:
+                            maxVotes.clear()
+                        maxVotes.append(x)
+                    elif y[1].numOfVotes > maxVotes:
                 out = ""
                 if len(maxVotes) > 1:
                     print("现在有超过一名玩家得票并列最高，为%d票，如下所示：" % maxVotes[0][1].numOfVotes)
@@ -166,9 +164,10 @@ class Game:
                         out = input("请输入出局的玩家")
                 else:
                     out = maxVotes[0][0]
-                #TODO: 输出出局信息并将出局玩家设为死亡状态
-                print("玩家%s被投票出局，身份是%s，没有遗言。" %
+                Game.游戏字典[out].alive = False
+                print("玩家%s被投票出局，身份是%s，没有遗言。" % (out, Game.游戏字典[out].charactor)
                 
+                #TODO: 胜利条件判定
                 break
 
             test = input('是否开始游戏？（y/n）').lower()
