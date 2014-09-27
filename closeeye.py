@@ -3,21 +3,22 @@ import string
 import random
 
 class Game:
-        讨论时间 = 5
-        医生总针数 = 5
-        狙击手子弹数 = 3
-        
-    def __init__():
-        游戏字典 = {} #格式为"玩家名:玩家对象"
-    
+    讨论时间 = 5
+    医生总针数 = 5
+    狙击手子弹数 = 3
+
+    def __init__(self):
+        self.游戏字典 = {} #格式为"玩家名:玩家对象"
+
     def whoWin(self):
         身份计数字典 = {"平民":0, "警察":0, "医生":0, "杀手":0, "狙击":0}
         for x in self.游戏字典.values():
             身份计数字典[x.charactor] += 1
-        if 身份计数字典[平民] == 0 or 身份计数字典[警察] + 身份计数字典[医生] == 0 or 身份计数字典[平民]+身份计数字典[警察]+身份计数字典[医生] < 身份计数字典[杀手]+身份计数字典[狙击]:
+
+        if 身份计数字典["平民"] == 0 or 身份计数字典["警察"] + 身份计数字典["医生"] == 0 or 身份计数字典["平民"]+身份计数字典["警察"]+身份计数字典["医生"] < 身份计数字典["杀手"]+身份计数字典["狙击"]:
             print("坏人方胜利")
             return "bad"
-        elif 身份计数字典[杀手]+身份计数字典[狙击] == 0:
+        elif 身份计数字典["杀手"]+身份计数字典["狙击"] == 0:
             print("好人方胜利")
             return "good"
         else:
@@ -82,12 +83,12 @@ class Game:
         警察组对象 = 警察组()
         杀手组对象 = 杀手组()
         行动字典 = {"警察组":警察组对象, "杀手组":杀手组对象}
-        for x in self.游戏列表.items():
+        for x in self.游戏字典.items():
             if x[1].charactor == "杀手":
                 杀手组对象.killers[x[0]] = x[1]
             elif x[1].charactor == "警察":
                 警察组对象.polices[x[0]] = x[1]
-            else
+            else:
                 行动字典[x[0]] = x[1]
         
         #游戏流程开始
@@ -129,7 +130,7 @@ class Game:
             voteCountDict = {}  #格式为：{"被票人":票数, ...}
             while voteCount <= len(存活列表):
                 if voteCount == len(存活列表):
-                    voteInformation = print("所有存活玩家已投票，回复空行结束白天流程并进行计票，回复“投票人 被票人”进行改票").rstrip("\n").split()
+                    voteInformation = input("所有存活玩家已投票，回复空行结束白天流程并进行计票，回复“投票人 被票人”进行改票").rstrip("\n").split()
                     if voteInformation[0] == "":
                         voteCount += 1
                 else:
@@ -140,7 +141,7 @@ class Game:
                     if voteInformation[0] not in voteDict.keys():
                         voteCount += 1
                     if voteInformation[1] not in 存活列表:
-                        print("警告：%s投票了不能票到的%s（已死亡/输入有误），将视为自票" % voteInformation）
+                        print("警告：%s投票了不能票到的%s（已死亡/输入有误），将视为自票" % (voteInformation[0],voteInformation[1]))
                         voteDict[voteInformation[0]] = voteInformation[0]
                     else:
                         voteDict[voteInformation[0]] = voteInformation[1]
@@ -162,10 +163,10 @@ class Game:
             for x in self.游戏字典.items():
                 x[1].numOfVotes = voteCountDict[x[0]]
                 if len(maxVotes) == 0 or x[1].numOfVotes >= maxVotes[0][1].numOfvotes:
-                    if x[1].numOfVotes > maxVotes[0][1].numOfVotes:
+                    if len(maxVotes) != 0 and x[1].numOfVotes > maxVotes[0][1].numOfVotes:
                         maxVotes.clear()
                     maxVotes.append(x)
-                elif y[1].numOfVotes > maxVotes:
+
             out = ""
             if len(maxVotes) > 1:
                 print("现在有超过一名玩家得票并列最高，为%d票，如下所示：" % maxVotes[0][1].numOfVotes)
@@ -179,7 +180,7 @@ class Game:
             else:
                 out = maxVotes[0][0]
             self.游戏字典[out].alive = False
-            print("玩家%s被投票出局，身份是%s，没有遗言。" % (out, self.游戏字典[out].charactor)
+            print("玩家%s被投票出局，身份是%s，没有遗言。" % (out, self.游戏字典[out].charactor))
             
             if self.whoWin() != "none":
                 return
