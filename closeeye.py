@@ -5,6 +5,7 @@ class Game:
     讨论时间 = 5
     医生总针数 = 5
     狙击手子弹数 = 3
+    是否1版规则 = True
 
     def __init__(self):
         self.游戏字典 = {}  # 格式为"玩家名:玩家对象"
@@ -12,9 +13,12 @@ class Game:
     def whoWin(self):
         身份计数字典 = {"平民": 0, "警察": 0, "医生": 0, "杀手": 0, "狙击": 0}
         for x in self.游戏字典.values():
-            身份计数字典[x.charactor] += 1
+            身份计数字典[x.character] += 1
 
-        if 身份计数字典["平民"] == 0 or 身份计数字典["警察"] + 身份计数字典["医生"] == 0 or 身份计数字典["平民"] + 身份计数字典["警察"] + 身份计数字典["医生"] < 身份计数字典["杀手"] + 身份计数字典["狙击"]:
+        if 身份计数字典["平民"] == 0 or 身份计数字典["平民"] + 身份计数字典["警察"] + 身份计数字典["医生"] < 身份计数字典["杀手"] + 身份计数字典["狙击"]:
+            print("坏人方胜利")
+            return "bad"
+        elif not Game.是否1版规则 and 身份计数字典["警察"] + 身份计数字典["医生"] == 0:
             print("坏人方胜利")
             return "bad"
         elif 身份计数字典["杀手"] + 身份计数字典["狙击"] == 0:
@@ -76,19 +80,21 @@ class Game:
         #####测试用代码#####
         #print(self.身份列表)
         for x in self.游戏字典.items():
-            print(x[0] + '\t' + x[1].charactor)
+            print(x[0] + '\t' + x[1].character)
         ####################
 
         警察组对象 = 警察组()
         杀手组对象 = 杀手组()
         行动字典 = {"警察组": 警察组对象, "杀手组": 杀手组对象}
         for x in self.游戏字典.items():
-            if x[1].charactor == "杀手":
+            if x[1].character == "杀手":
                 杀手组对象.killers[x[0]] = x[1]
-            elif x[1].charactor == "警察":
+            elif x[1].character == "警察":
                 警察组对象.polices[x[0]] = x[1]
             else:
                 行动字典[x[0]] = x[1]
+        if Game.是否1版规则:
+            行动字典.pop("警察组")
 
         #游戏流程开始
         days = 1
@@ -107,7 +113,7 @@ class Game:
             flag = True
             for x in self.游戏字典.items():
                 if x[1].isKilled:
-                    print("昨天晚上，%s被杀了，身份是%s，请留下遗言。" % (x[0], x[1].charactor))
+                    print("昨天晚上，%s被杀了，身份是%s，请留下遗言。" % (x[0], x[1].character))
                     flag = False
             if flag:
                 print("昨晚是个平安夜。")
@@ -118,7 +124,6 @@ class Game:
             days += 1
             night = not night
             print("第%d天白天开始，请各位自由讨论，时长%d分钟。" % (days, self.讨论时间))
-            # TODO：计时器和投票程序
             存活列表 = []
             for x in self.游戏字典.items():
                 if x[1].isAlive():
@@ -130,10 +135,16 @@ class Game:
             while voteCount <= len(存活列表):
                 if voteCount == len(存活列表):
                     voteInformation = input("所有存活玩家已投票，回复空行结束白天流程并进行计票，回复“投票人 被票人”进行改票").rstrip("\n").split()
-                    if voteInformation[0] == "":
+                    if not voteInformation:
+                        print("调试 1")
+                        print(voteInformation)
                         voteCount += 1
                 else:
                     voteInformation = input("请输入投票信息，格式为”投票人 被票人“一次一行，如“小V 悲喜”").split()
+                    print("调试 2")
+                    print(voteInformation)
+                if not voteInformation:
+                    continue
                 if voteInformation[0] not in 存活列表:
                     print("错误：%s不具有投票权限" % voteInformation[0])
                 else:
@@ -153,16 +164,16 @@ class Game:
                 else:
                     voteCountDict[x] += 1
 
-            voteCountList = list(voteCountDict)
+            voteCountList = list(voteCountDict)     # TODO 处理排序问题
             voteCountList.sort()
 
             for x in voteCountList:
-                print("%s\t%d" % x)
+                print("%s\t%s" % (x[0], x[1]))
 
             maxVotes = []
             for x in self.游戏字典.items():
                 x[1].numOfVotes = voteCountDict[x[0]]
-                if len(maxVotes) == 0 or x[1].numOfVotes >= maxVotes[0][1].numOfvotes:
+                if len(maxVotes) == 0 or x[1].numOfVotes >= maxVotes[0][1].numOfVotes:
                     if len(maxVotes) != 0 and x[1].numOfVotes > maxVotes[0][1].numOfVotes:
                         maxVotes.clear()
                     maxVotes.append(x)
@@ -179,7 +190,7 @@ class Game:
             else:
                 out = maxVotes[0][0]
             self.游戏字典[out].alive = False
-            print("玩家%s被投票出局，身份是%s，没有遗言。" % (out, self.游戏字典[out].charactor))
+            print("玩家%s被投票出局，身份是%s，没有遗言。" % (out, self.游戏字典[out].character))
 
             if self.whoWin() != "none":
                 return
@@ -252,7 +263,7 @@ class 警察组(身份):
         self.polices = {}
 
     def observe(self, character):
-        return character.charactor
+        return character.character
 
     def operate(self):
         print("现在是警察的活动时间，请选择需要查身份的玩家。")
