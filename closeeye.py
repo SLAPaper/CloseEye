@@ -13,7 +13,8 @@ class Game:
     def whoWin(self):
         身份计数字典 = {"平民": 0, "警察": 0, "医生": 0, "杀手": 0, "狙击": 0}
         for x in self.游戏字典.values():
-            身份计数字典[x.character] += 1
+            if x.isAlive():
+                身份计数字典[x.character] += 1
 
         if 身份计数字典["平民"] == 0 or 身份计数字典["平民"] + 身份计数字典["警察"] + 身份计数字典["医生"] < 身份计数字典["杀手"] + 身份计数字典["狙击"]:
             print("坏人方胜利")
@@ -41,12 +42,12 @@ class Game:
         print(玩家列表, end='\n\n')
 
         print("现在共有%s名玩家。" % len(玩家列表))
-        身份 = input("\n请输入身份组成及其人数（例：警察 2），一行一个，输入空行结束，总和必须小于等于总人数\n")
+        身份组成 = input("\n请输入身份组成及其人数（例：警察 2），一行一个，输入空行结束，总和必须小于等于总人数\n")
         temp = 0
         玩家列表副本 = 玩家列表[:]
-        while 身份 != "" and temp <= len(玩家列表):
-            t = 身份.split()
-            for ti in t[1:]:  #去除非法字符
+        while 身份组成 != "" and temp <= len(玩家列表):
+            t = 身份组成.split()
+            for ti in t[1:]:  # 去除非法字符
                 if not ti.isnumeric():
                     t.remove(ti)
 
@@ -55,25 +56,25 @@ class Game:
                 玩家列表副本.remove(抽出玩家)
 
                 if t[0] == "平民":
-                    self.游戏字典[抽出玩家] = 平民()
+                    self.游戏字典[抽出玩家] = 平民(self)
                 elif t[0] == "杀手":
                     self.游戏字典[抽出玩家] = 杀手()
                 elif t[0] == "警察":
                     self.游戏字典[抽出玩家] = 警察()
                 elif t[0] == "医生":
-                    self.游戏字典[抽出玩家] = 医生()
+                    self.游戏字典[抽出玩家] = 医生(self)
                 elif t[0] == "狙击":
-                    self.游戏字典[抽出玩家] = 狙击手()
+                    self.游戏字典[抽出玩家] = 狙击手(self)
                 else:
-                    self.游戏字典[抽出玩家] = 平民()
+                    self.游戏字典[抽出玩家] = 平民(self)
 
             temp += int(t[1])
-            身份 = input()
+            身份组成 = input()
 
-        #处理剩余玩家
+        # 处理剩余玩家
         if len(玩家列表副本) > 0:
             for x in 玩家列表副本:
-                self.游戏字典[x] = 平民()
+                self.游戏字典[x] = 平民(self)
 
         print("身份分配完毕，身份如下：", end='\n\n')
 
@@ -83,8 +84,8 @@ class Game:
             print(x[0] + '\t' + x[1].character)
         ####################
 
-        警察组对象 = 警察组()
-        杀手组对象 = 杀手组()
+        警察组对象 = 警察组(self)
+        杀手组对象 = 杀手组(self)
         行动字典 = {"警察组": 警察组对象, "杀手组": 杀手组对象}
         for x in self.游戏字典.items():
             if x[1].character == "杀手":
@@ -136,13 +137,9 @@ class Game:
                 if voteCount == len(存活列表):
                     voteInformation = input("所有存活玩家已投票，回复空行结束白天流程并进行计票，回复“投票人 被票人”进行改票").rstrip("\n").split()
                     if not voteInformation:
-                        print("调试 1")
-                        print(voteInformation)
                         voteCount += 1
                 else:
                     voteInformation = input("请输入投票信息，格式为”投票人 被票人“一次一行，如“小V 悲喜”").split()
-                    print("调试 2")
-                    print(voteInformation)
                 if not voteInformation:
                     continue
                 if voteInformation[0] not in 存活列表:
@@ -164,15 +161,17 @@ class Game:
                 else:
                     voteCountDict[x] += 1
 
-            voteCountList = list(voteCountDict)     # TODO 处理排序问题
+            voteCountList = list(voteCountDict)
             voteCountList.sort()
 
             for x in voteCountList:
                 print("%s\t%s" % (x[0], x[1]))
-
             maxVotes = []
             for x in self.游戏字典.items():
-                x[1].numOfVotes = voteCountDict[x[0]]
+                if x[0] not in voteCountDict.keys():
+                    x[1].numOfVotes = 0
+                else:
+                    x[1].numOfVotes = voteCountDict[x[0]]
                 if len(maxVotes) == 0 or x[1].numOfVotes >= maxVotes[0][1].numOfVotes:
                     if len(maxVotes) != 0 and x[1].numOfVotes > maxVotes[0][1].numOfVotes:
                         maxVotes.clear()
@@ -242,31 +241,39 @@ class 角色:
 
 
 class 身份:
+    def __init__(self, game):
+        self.game = game
+
     def operate(self):
         return
 
 
 class 平民(角色, 身份):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, game):
+        角色.__init__(self)
+        身份.__init__(self, game)
         self.character = '平民'
 
 
-class 警察(角色, 身份):
+class 警察(角色):
     def __init__(self):
         super().__init__()
         self.character = '警察'
 
 
 class 警察组(身份):
-    def __init__(self):
+    def __init__(self, game):
+        super().__init__(game)
         self.polices = {}
 
     def observe(self, character):
-        return character.character
+        return self.game.游戏字典[character].character
 
     def operate(self):
-        print("现在是警察的活动时间，请选择需要查身份的玩家。")
+        who = input("现在是警察的活动时间，请选择需要查身份的玩家。")
+        while not who == input("请再输入一次确认"):
+            who = input("请选择需要查身份的玩家。")
+        self.observe(who)
 
 
 class 杀手(角色):
@@ -276,43 +283,56 @@ class 杀手(角色):
 
 
 class 杀手组(身份):
-    def __init__(self):
+    def __init__(self, game):
+        super().__init__(game)
         self.killers = {}
 
     def kill(self, character):
-        character.killed()
+        self.game.游戏字典[character].killed()
 
     def operate(self):
-        print("现在是杀手的活动时间，请选择需要杀死的玩家。")
+        # TODO 判断是否砍到狙击手
+        who = input("现在是杀手的活动时间，请选择需要杀死的玩家。")
+        while not who == input("请再输入一次确认"):
+            who = input("请选择需要杀死的玩家")
+        self.kill(who)
 
 
 class 医生(角色, 身份):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, game):
+        角色.__init__(self)
+        身份.__init__(self, game)
         self.character = '医生'
         self.numOfPins = Game.医生总针数
 
     def cure(self, character):
-        character.cure()
+        self.game.游戏字典[character].cure()
 
     def operate(self):
-        print("现在是医生的活动时间，请选择需要扎针的玩家。")
+        # TODO 判断针数
+        who = input("现在是医生的活动时间，请选择需要扎针的玩家。")
+        while not who == input("请再输入一次确认"):
+            who = input("请选择要扎针的玩家")
+        self.cure(who)
 
 
 class 狙击手(角色, 身份):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, game):
+        角色.__init__(self)
+        身份.__init__(self, game)
         self.character = '狙击'
         self.numOfShoots = Game.狙击手子弹数
 
     def shoot(self, character):
-        # TODO：判断子弹数量和已击发子弹数量
-        # TODO：判断是否射到杀手
-        character.killed()
+        # TODO 判断子弹数量和已击发子弹数量
+        # TODO 判断是否射到杀手
+        self.game.游戏字典[character].killed()
 
     def operate(self):
-        print("现在是杀手的活动时间，请选择需要射击的玩家。")
-
+        who = input("现在是杀手的活动时间，请选择需要射击的玩家。")
+        while not who == input("请再输入一次确认"):
+            who = input("请选择要射击的玩家")
+        self.shoot(who)
 
 g = Game()
 g.play()
