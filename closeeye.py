@@ -109,11 +109,16 @@ class Game:
             for x in 行动字典.values():
                 x.operate()
 
+            # 调试信息
+            for x in self.游戏字典.items():
+                print("%s %d" % (x[0],x[1].killCount))
+            ##########
+
             #处理夜晚的行动结果
             print("\n第%d天夜晚结束。" % days)
             flag = True
             for x in self.游戏字典.items():
-                if x[1].isKilled:
+                if x[1].isKilled():
                     print("昨天晚上，%s被杀了，身份是%s，请留下遗言。" % (x[0], x[1].character))
                     flag = False
             if flag:
@@ -165,7 +170,7 @@ class Game:
             voteCountList.sort()
 
             for x in voteCountList:
-                print("%s\t%s" % (x[0], x[1]))
+                print(x)
             maxVotes = []
             for x in self.游戏字典.items():
                 if x[0] not in voteCountDict.keys():
@@ -188,6 +193,7 @@ class Game:
                     out = input("请输入出局的玩家")
             else:
                 out = maxVotes[0][0]
+
             self.游戏字典[out].alive = False
             print("玩家%s被投票出局，身份是%s，没有遗言。" % (out, self.游戏字典[out].character))
 
@@ -216,7 +222,6 @@ class 角色:
     def cured(self):
         self.killCount -= 1
 
-    @property
     def isKilled(self):
         if self.killCount > 0:
             self.alive = False
@@ -288,10 +293,12 @@ class 杀手组(身份):
         self.killers = {}
 
     def kill(self, character):
-        self.game.游戏字典[character].killed()
+        if self.game.游戏字典[character].character == "狙击":
+            print("砍到杀手了，攻击无效。")
+        else:
+            self.game.游戏字典[character].killed()
 
     def operate(self):
-        # TODO 判断是否砍到狙击手
         who = input("现在是杀手的活动时间，请选择需要杀死的玩家。")
         while not who == input("请再输入一次确认"):
             who = input("请选择需要杀死的玩家")
@@ -304,16 +311,21 @@ class 医生(角色, 身份):
         身份.__init__(self, game)
         self.character = '医生'
         self.numOfPins = Game.医生总针数
+        self.pins = 0
 
     def cure(self, character):
         self.game.游戏字典[character].cure()
 
     def operate(self):
-        # TODO 判断针数
-        who = input("现在是医生的活动时间，请选择需要扎针的玩家。")
-        while not who == input("请再输入一次确认"):
-            who = input("请选择要扎针的玩家")
-        self.cure(who)
+        if self.numOfPins > 0:
+            if self.pins > self.numOfPins:
+                print("现在医生已经没有针了。")
+        else:
+            who = input("现在是医生的活动时间，请选择需要扎针的玩家。")
+            while not who == input("请再输入一次确认"):
+                who = input("请选择要扎针的玩家")
+            self.pins += 1
+            self.cure(who)
 
 
 class 狙击手(角色, 身份):
@@ -322,17 +334,26 @@ class 狙击手(角色, 身份):
         身份.__init__(self, game)
         self.character = '狙击'
         self.numOfShoots = Game.狙击手子弹数
+        self.shoots = 0
 
     def shoot(self, character):
-        # TODO 判断子弹数量和已击发子弹数量
-        # TODO 判断是否射到杀手
-        self.game.游戏字典[character].killed()
+        if self.game.游戏字典[character].charactor == "杀手":
+            print("杀手被射击了，射击无效，没收狙击手子弹。")
+            self.shoots = self.numOfShoots + 1
+        else:
+            self.game.游戏字典[character].killed()
 
     def operate(self):
-        who = input("现在是杀手的活动时间，请选择需要射击的玩家。")
-        while not who == input("请再输入一次确认"):
-            who = input("请选择要射击的玩家")
-        self.shoot(who)
+        if self.numOfShoots > 0:
+            if self.shoots > self.numOfShoots:
+                print("现在狙击手已经没有子弹了。")
+        else:
+                who = input("现在是狙击手的活动时间，请选择需要射击的玩家。")
+                while not who == input("请再输入一次确认"):
+                    who = input("请选择要射击的玩家")
+                self.shoots += 1
+                self.shoot(who)
+
 
 g = Game()
 g.play()
