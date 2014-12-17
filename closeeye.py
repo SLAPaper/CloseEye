@@ -5,7 +5,7 @@ class Game:
     讨论时间 = 5
     医生总针数 = 5
     狙击手子弹数 = 3
-    是否1版规则 = True
+    是否1版规则 = False
 
     def __init__(self):
         self.游戏字典 = {}  # 格式为"玩家名:玩家对象"
@@ -106,7 +106,16 @@ class Game:
             for x in self.游戏字典.values():
                 x.killCount = 0
             print("\n第%d天夜晚开始，请有身份的玩家开始行动。" % days)
+
+            # 调试信息
+            print(行动字典)
+            ###########
+
             for x in 行动字典.values():
+                # 调试信息
+                print(x)
+                #############
+
                 x.operate()
 
             # 调试信息
@@ -357,3 +366,5 @@ class 狙击手(角色, 身份):
 
 g = Game()
 g.play()
+
+#20141217测试：警察、杀手、平民，中盘未发现问题
