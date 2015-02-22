@@ -78,10 +78,10 @@ class Game:
 
         print("身份分配完毕，身份如下：", end='\n\n')
 
-        #####测试用代码#####
+        #####调试信息#####
         #print(self.身份列表)
-        for x in self.游戏字典.items():
-            print(x[0] + '\t' + x[1].character)
+        #for x in self.游戏字典.items():
+        #    print(x[0] + '\t' + x[1].character)
         ####################
 
         警察组对象 = 警察组(self)
@@ -97,33 +97,33 @@ class Game:
         if Game.是否1版规则:
             行动字典.pop("警察组")
 
-        #游戏流程开始
+        # 游戏流程开始
         days = 1
         night = False
         while True:
-            #夜晚流程开始
+            # 夜晚流程开始
             night = not night
             for x in self.游戏字典.values():
                 x.killCount = 0
             print("\n第%d天夜晚开始，请有身份的玩家开始行动。" % days)
 
-            # 调试信息
-            print(行动字典)
-            ###########
+            #####调试信息#####
+            #print(行动字典)
+            ##################
 
             for x in 行动字典.values():
-                # 调试信息
-                print(x)
-                #############
+                #####调试信息#####
+                #print(x)
+                ##################
 
                 x.operate()
 
-            # 调试信息
-            for x in self.游戏字典.items():
-                print("%s %d" % (x[0],x[1].killCount))
-            ##########
+            #####调试信息####
+            #for x in self.游戏字典.items():
+            #    print("%s %d" % (x[0],x[1].killCount))
+            ##################
 
-            #处理夜晚的行动结果
+            # 处理夜晚的行动结果
             print("\n第%d天夜晚结束。" % days)
             flag = True
             for x in self.游戏字典.items():
@@ -135,10 +135,13 @@ class Game:
             if self.whoWin() != "none":
                 return
 
-            #白天流程开始
+            # 白天流程开始
             days += 1
             night = not night
             print("第%d天白天开始，请各位自由讨论，时长%d分钟。" % (days, self.讨论时间))
+
+            # TODO:计时器没做，先人工计时吧
+
             存活列表 = []
             for x in self.游戏字典.items():
                 if x[1].isAlive():
@@ -284,10 +287,10 @@ class 警察组(身份):
         return self.game.游戏字典[character].character
 
     def operate(self):
-        who = input("现在是警察的活动时间，请选择需要查身份的玩家。")
-        while not who == input("请再输入一次确认"):
+        who = input("现在是警察的活动时间，请选择需要查身份的玩家。：")
+        while not who == input("请再输入一次确认："):
             who = input("请选择需要查身份的玩家。")
-        self.observe(who)
+        print("%s 的身份是 %s" % (who, self.observe(who)))
 
 
 class 杀手(角色):
@@ -367,4 +370,5 @@ class 狙击手(角色, 身份):
 g = Game()
 g.play()
 
-#20141217测试：警察、杀手、平民，中盘未发现问题
+# 20141217测试：警察、杀手、平民，中盘未发现问题
+# 20150222测试：调试中input()输出中文乱码，医生、狙击无反应
