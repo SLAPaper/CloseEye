@@ -28,6 +28,14 @@ class Game:
         else:
             return "none"
 
+    def output(self, groupByCharacter = False, includeCharacter = False, includeKillCount = False, includePinCount = False, includeDeathReason = False, includeVoteCount = False):
+        if groupByCharacter == False:
+            for x in self.游戏字典.items():
+                print(x[0] + '\t' + x[1].character)
+        else:
+            pass
+        # TODO:通用输出函数未完成
+
     def play(self):
         # os.system('cls')
         f = open("config.txt", encoding="utf_8")
@@ -77,12 +85,7 @@ class Game:
                 self.游戏字典[x] = 平民(self)
 
         print("身份分配完毕，身份如下：", end='\n\n')
-
-        #####调试信息#####
-        #print(self.身份列表)
-        #for x in self.游戏字典.items():
-        #    print(x[0] + '\t' + x[1].character)
-        ####################
+        self.output()
 
         警察组对象 = 警察组(self)
         杀手组对象 = 杀手组(self)
@@ -121,7 +124,7 @@ class Game:
             #####调试信息####
             #for x in self.游戏字典.items():
             #    print("%s %d" % (x[0],x[1].killCount))
-            ##################
+            #################
 
             # 处理夜晚的行动结果
             print("\n第%d天夜晚结束。" % days)
@@ -152,11 +155,11 @@ class Game:
             voteCountDict = {}  # 格式为：{"被票人":票数, ...}
             while voteCount <= len(存活列表):
                 if voteCount == len(存活列表):
-                    voteInformation = input("所有存活玩家已投票，回复空行结束白天流程并进行计票，回复“投票人 被票人”进行改票").rstrip("\n").split()
+                    voteInformation = input("所有存活玩家已投票，回复空行结束白天流程并进行计票，回复“投票人 被票人”进行改票\n").rstrip("\n").split()
                     if not voteInformation:
                         voteCount += 1
                 else:
-                    voteInformation = input("请输入投票信息，格式为”投票人 被票人“一次一行，如“小V 悲喜”").split()
+                    voteInformation = input("请输入投票信息，格式为”投票人 被票人“一次一行，如“小V 悲喜”\n").split()
                 if not voteInformation:
                     continue
                 if voteInformation[0] not in 存活列表:
@@ -287,7 +290,7 @@ class 警察组(身份):
         return self.game.游戏字典[character].character
 
     def operate(self):
-        who = input("现在是警察的活动时间，请选择需要查身份的玩家。：")
+        who = input("现在是警察的活动时间，请选择需要查身份的玩家：")
         while not who == input("请再输入一次确认："):
             who = input("请选择需要查身份的玩家。")
         print("%s 的身份是 %s" % (who, self.observe(who)))
@@ -306,14 +309,14 @@ class 杀手组(身份):
 
     def kill(self, character):
         if self.game.游戏字典[character].character == "狙击":
-            print("砍到杀手了，攻击无效。")
+            print("砍到狙击手了，攻击无效。")
         else:
             self.game.游戏字典[character].killed()
 
     def operate(self):
-        who = input("现在是杀手的活动时间，请选择需要杀死的玩家。")
-        while not who == input("请再输入一次确认"):
-            who = input("请选择需要杀死的玩家")
+        who = input("现在是杀手的活动时间，请选择需要杀死的玩家：")
+        while not who == input("请再输入一次确认："):
+            who = input("请选择需要杀死的玩家：")
         self.kill(who)
 
 
@@ -326,18 +329,18 @@ class 医生(角色, 身份):
         self.pins = 0
 
     def cure(self, character):
-        self.game.游戏字典[character].cure()
+        self.game.游戏字典[character].cured()
 
     def operate(self):
         if self.numOfPins > 0:
             if self.pins > self.numOfPins:
                 print("现在医生已经没有针了。")
-        else:
-            who = input("现在是医生的活动时间，请选择需要扎针的玩家。")
-            while not who == input("请再输入一次确认"):
-                who = input("请选择要扎针的玩家")
-            self.pins += 1
-            self.cure(who)
+            else:
+                who = input("现在是医生的活动时间，请选择需要扎针的玩家：")
+                while not who == input("请再输入一次确认："):
+                    who = input("请选择要扎针的玩家：")
+                self.pins += 1
+                self.cure(who)
 
 
 class 狙击手(角色, 身份):
@@ -349,7 +352,7 @@ class 狙击手(角色, 身份):
         self.shoots = 0
 
     def shoot(self, character):
-        if self.game.游戏字典[character].charactor == "杀手":
+        if self.game.游戏字典[character].character == "杀手":
             print("杀手被射击了，射击无效，没收狙击手子弹。")
             self.shoots = self.numOfShoots + 1
         else:
@@ -359,10 +362,10 @@ class 狙击手(角色, 身份):
         if self.numOfShoots > 0:
             if self.shoots > self.numOfShoots:
                 print("现在狙击手已经没有子弹了。")
-        else:
-                who = input("现在是狙击手的活动时间，请选择需要射击的玩家。")
-                while not who == input("请再输入一次确认"):
-                    who = input("请选择要射击的玩家")
+            else:
+                who = input("现在是狙击手的活动时间，请选择需要射击的玩家：")
+                while not who == input("请再输入一次确认："):
+                    who = input("请选择要射击的玩家：")
                 self.shoots += 1
                 self.shoot(who)
 
@@ -371,4 +374,4 @@ g = Game()
 g.play()
 
 # 20141217测试：警察、杀手、平民，中盘未发现问题
-# 20150222测试：调试中input()输出中文乱码，医生、狙击无反应
+# 20150222测试：调试中input()输出中文乱码，医生、狙击无反应，缺少一个统一的输出身份列表的函数
