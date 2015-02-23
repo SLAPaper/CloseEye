@@ -1,5 +1,5 @@
 ﻿import random
-
+import os
 
 class Game:
     讨论时间 = 5
@@ -28,26 +28,67 @@ class Game:
         else:
             return "none"
 
-    def output(self, groupByCharacter=False, includeCharacter=False, includeKillCount=False, includePinCount=False, includeDeathReason=False, includeVoteCount=False):
+    def output(self, groupByCharacter=False, includeCharacter=False, includePinCount=False, includeDeathReason=False, includeVoteCount=False):
+        def title():
+            s = "玩家名"
+            if includeCharacter:
+                s = s + "\t身份"
+            if includePinCount:
+                s = s + "\t空针数"
+            if includeVoteCount:
+                s = s + "\t票数"
+            s += "\t生死"
+            if includeDeathReason:
+                s +="\t死亡原因"
+            return s + "\n"
+
+        def circle(x):
+            s = x[0]
+            if includeCharacter:
+                s = s + "\t" + x[1].character
+            if includePinCount:
+                s = s + "\t" + x[1].getNumOfZeroPin
+            if includeVoteCount:
+                s = s + "\t" + x[1].getNumOfVotes
+
+            if x[1].isAlive:
+                s += "\t存活"
+            else:
+                s += "\t出局"
+
+            if includeDeathReason:
+                s = s + "\t" + x[1].deathNotes
+            return s
+
         if groupByCharacter == False:
+            print("\n" + title())
             for x in self.游戏字典.items():
-                print(x[0] + '\t' + x[1].character)
+                s = circle(x)
+                print(s)
+            print("\n")
         else:
-            pass
-        # TODO:通用输出函数未完成
+            身份顺序列表 = ("警察","杀手","医生","狙击","平民")
+            print("\n\t" + title())
+            for c in 身份顺序列表:
+                print(c + "：")
+                for x in self.游戏字典.items():
+                    if x[1].character == c:
+                        s = circle(x)
+                        print("\t" + s)
+            print("\n")
 
     def play(self):
-        # os.system('cls')
+        os.system("cls")
         f = open("config.txt", encoding="utf_8")
 
-        玩家名字 = f.readline().rstrip('\n').lstrip('\ufeff')
+        玩家名字 = f.readline().rstrip("\n").lstrip("\ufeff")
         玩家列表 = []
         while 玩家名字 != "":
             玩家列表.append(玩家名字)
-            玩家名字 = f.readline().rstrip('\n')
+            玩家名字 = f.readline().rstrip("\n")
 
         print("正在分配身份\n")
-        print(玩家列表, end='\n\n')
+        print(玩家列表, end="\n\n")
 
         print("现在共有%s名玩家。" % len(玩家列表))
         身份组成 = input("\n请输入身份组成及其人数（例：警察 2），一行一个，输入空行结束，总和必须小于等于总人数\n")
@@ -84,8 +125,8 @@ class Game:
             for x in 玩家列表副本:
                 self.游戏字典[x] = 平民(self)
 
-        print("身份分配完毕，身份如下：", end='\n\n')
-        self.output()
+        print("身份分配完毕，身份如下：", end="\n\n")
+        self.output(groupByCharacter = True)
 
         警察组对象 = 警察组(self)
         杀手组对象 = 杀手组(self)
@@ -118,7 +159,7 @@ class Game:
                 #####调试信息#####
                 #print(x)
                 ##################
-                if x.alive():
+                if isinstance(x,警察组) or isinstance(x,杀手组) or (x.isAlive() and x.character != "平民"):
                     self.output()
                     x.operate()
 
@@ -222,7 +263,7 @@ class 角色:
         self.alive = True
         self.zeroPin = 0
         self.killCount = 0
-        self.character = ''
+        self.character = ""
         self.numOfVotes = 0
         self.deathNotes = ""
 
@@ -273,13 +314,13 @@ class 平民(角色, 身份):
     def __init__(self, game):
         角色.__init__(self)
         身份.__init__(self, game)
-        self.character = '平民'
+        self.character = "平民"
 
 
 class 警察(角色):
     def __init__(self):
         super().__init__()
-        self.character = '警察'
+        self.character = "警察"
 
 
 class 警察组(身份):
@@ -300,7 +341,7 @@ class 警察组(身份):
 class 杀手(角色):
     def __init__(self):
         super().__init__()
-        self.character = '杀手'
+        self.character = "杀手"
 
 
 class 杀手组(身份):
@@ -325,7 +366,7 @@ class 医生(角色, 身份):
     def __init__(self, game):
         角色.__init__(self)
         身份.__init__(self, game)
-        self.character = '医生'
+        self.character = "医生"
         self.numOfPins = Game.医生总针数
         self.pins = 0
 
@@ -348,7 +389,7 @@ class 狙击手(角色, 身份):
     def __init__(self, game):
         角色.__init__(self)
         身份.__init__(self, game)
-        self.character = '狙击'
+        self.character = "狙击"
         self.numOfShoots = Game.狙击手子弹数
         self.shoots = 0
 
