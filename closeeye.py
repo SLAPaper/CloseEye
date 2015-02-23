@@ -28,7 +28,7 @@ class Game:
         else:
             return "none"
 
-    def output(self, groupByCharacter = False, includeCharacter = False, includeKillCount = False, includePinCount = False, includeDeathReason = False, includeVoteCount = False):
+    def output(self, groupByCharacter=False, includeCharacter=False, includeKillCount=False, includePinCount=False, includeDeathReason=False, includeVoteCount=False):
         if groupByCharacter == False:
             for x in self.游戏字典.items():
                 print(x[0] + '\t' + x[1].character)
@@ -118,8 +118,9 @@ class Game:
                 #####调试信息#####
                 #print(x)
                 ##################
-
-                x.operate()
+                if x.alive():
+                    self.output()
+                    x.operate()
 
             #####调试信息####
             #for x in self.游戏字典.items():
@@ -184,8 +185,6 @@ class Game:
             voteCountList = list(voteCountDict)
             voteCountList.sort()
 
-            for x in voteCountList:
-                print(x)
             maxVotes = []
             for x in self.游戏字典.items():
                 if x[0] not in voteCountDict.keys():
@@ -196,6 +195,8 @@ class Game:
                     if len(maxVotes) != 0 and x[1].numOfVotes > maxVotes[0][1].numOfVotes:
                         maxVotes.clear()
                     maxVotes.append(x)
+            for x in voteCountList:
+                print("%s %d票" % (x, self.游戏字典[x].numOfVotes))
 
             if len(maxVotes) > 1:
                 print("现在有超过一名玩家得票并列最高，为%d票，如下所示：" % maxVotes[0][1].numOfVotes)
@@ -375,3 +376,4 @@ g.play()
 
 # 20141217测试：警察、杀手、平民，中盘未发现问题
 # 20150222测试：调试中input()输出中文乱码，医生、狙击无反应，缺少一个统一的输出身份列表的函数
+# 20150223测试：无明显错误，开始进行输出改进
