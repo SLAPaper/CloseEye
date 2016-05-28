@@ -8,7 +8,7 @@ class Game:
     是否1版规则 = False
 
     def __init__(self):
-        self.游戏字典 = {}  # 格式为"玩家名:玩家对象"
+        self.游戏字典 = {}  # 格式为"{"玩家名":玩家对象}, ..."
 
     def whoWin(self):
         身份计数字典 = {"平民": 0, "警察": 0, "医生": 0, "杀手": 0, "狙击": 0}
@@ -81,26 +81,28 @@ class Game:
         os.system("cls")
         f = open("config.txt", encoding="utf_8")
 
-        玩家名字 = f.readline().rstrip("\n").lstrip("\ufeff")
         玩家列表 = []
-        while 玩家名字 != "":
-            玩家列表.append(玩家名字)
-            玩家名字 = f.readline().rstrip("\n")
+        for name in f:
+            玩家列表.append(name.rstrip("\n").lstrip("\ufeff"))
+#        玩家名字 = f.readline().rstrip("\n").lstrip("\ufeff")
+#        while 玩家名字 != "":
+#            玩家列表.append(玩家名字)
+#            玩家名字 = f.readline().rstrip("\n")
 
         print("正在分配身份\n")
         print(玩家列表, end="\n\n")
 
         print("现在共有%s名玩家。" % len(玩家列表))
         身份组成 = input("\n请输入身份组成及其人数（例：警察 2），一行一个，输入空行结束，总和必须小于等于总人数\n")
-        temp = 0
+        已分配玩家数 = 0
         玩家列表副本 = 玩家列表[:]
-        while 身份组成 != "" and temp <= len(玩家列表):
+        while 身份组成 != "" and 已分配玩家数 <= len(玩家列表):
             t = 身份组成.split()
             for ti in t[1:]:  # 去除非法字符
                 if not ti.isnumeric():
                     t.remove(ti)
 
-            for ti in range(int(t[1])):
+            for i in range(int(t[1])):
                 抽出玩家 = random.choice(玩家列表副本)
                 玩家列表副本.remove(抽出玩家)
 
@@ -117,7 +119,7 @@ class Game:
                 else:
                     self.游戏字典[抽出玩家] = 平民(self)
 
-            temp += int(t[1])
+            已分配玩家数 += int(t[1])
             身份组成 = input()
 
         # 处理剩余玩家
@@ -132,9 +134,9 @@ class Game:
         杀手组对象 = 杀手组(self)
         行动字典 = {"警察组": 警察组对象, "杀手组": 杀手组对象}
         for x in self.游戏字典.items():
-            if x[1].character == "杀手":
+            if isinstance(x[1], 杀手) == "杀手":
                 杀手组对象.killers[x[0]] = x[1]
-            elif x[1].character == "警察":
+            elif isinstance(x[1], 警察) == "警察":
                 警察组对象.polices[x[0]] = x[1]
             else:
                 行动字典[x[0]] = x[1]
